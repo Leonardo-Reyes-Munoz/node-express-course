@@ -21,7 +21,7 @@ const getBody = (req, callback) => {
 };
 
 // here, you could declare one or more variables to store what comes back from the form.
-let item = "Enter something below.";
+let item = "Enter your name, choose a color, and choose the font size!";
 
 // here, you can change the form below to modify the input fields and what is displayed.
 // This is just ordinary html with string interpolation.
@@ -29,10 +29,23 @@ const form = () => {
   return `
   <body>
   <p>${item}</p>
-  <form method="POST">
-  <input name="item"></input>
-  <button type="submit">Submit</button>
-  </form>
+    <form method="POST">
+      <label for="name">
+        Name: <input type="text" id="name" name="user_name" />
+      </label>
+      <label for="user_color">
+        <select id="colors" name="user_color">
+          <option value="red">Red</option>
+          <option value="blue">Blue</option>
+          <option value="green">Green</option>
+          <option value="purple" selected>Purple</option>
+        </select>
+      </label>
+      <label for="size">
+        Font Size (1 - 10): <input type="number" id="number" name="font_size" min="1" max="10"/>
+      </label>
+      <button type="submit">Submit</button>
+    </form>
   </body>
   `;
 };
@@ -44,10 +57,10 @@ const server = http.createServer((req, res) => {
     getBody(req, (body) => {
       console.log("The body of the post is ", body);
       // here, you can add your own logic
-      if (body["item"]) {
-        item = body["item"];
+      if (body["user_name"]) {
+        item = `<h1 style="color:${body["user_color"]}; font-size:${body["font_size"]}rem">${body["user_name"]}</h1>`;
       } else {
-        item = "Nothing was entered.";
+        item = "You must entered something into the name field.";
       }
       // Your code changes would end here
       res.writeHead(303, {
