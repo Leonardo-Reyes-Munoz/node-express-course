@@ -3,9 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Testing Page</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
   </head>
   <body>
-    <h1>You have reached the testing page!</h1>
+    <h1>You have reached the product page!</h1>
+    
+    <!-- <form method="get" action="/api/v1/query"> -->
+     <form id="search-form" method="get">
+      <fieldset>
+        <legend><h2>Search Products</h2></legend>
+        <label for="search">
+          Item:
+          <input type="text" id="search" name="search">
+        </label>
+        <label for="priceLimit">
+          Max-Price:
+          <input type="number" id="priceLimit" name="priceLimit">
+        </label for="limit">
+          Max Number of Items:
+          <input type="number" id="limit" name="limit">
+        </label>
+        <button type="submit">Search</button>
+      </fieldset>
+    </form>
+    <div >
+      <h2>Results</h2>
+      <ul id="results">
+
+      </ul>
+    </div>
   </body>
 </html>
