@@ -1,8 +1,22 @@
 const express = require("express");
 const app = express();
-const { products } = require("./data");
+const { products, people } = require("./data");
 
-app.use(express.static("./public"));
+const logger = (req, res, next) => {
+  const method = req.method;
+  const url = req.url;
+  const time = Date.now();
+  console.log(method, url, time);
+
+  next();
+};
+
+app.use([
+  logger,
+  express.static("./public"),
+  express.urlencoded({ extended: false }),
+  express.json(),
+]);
 
 app.get("/api/v1/test", (req, res) => {
   res.json({ message: "It worked" });
@@ -39,6 +53,19 @@ app.get("/api/v1/query", (req, res) => {
     });
   }
   res.json(newProducts);
+});
+
+app.get("/api/v1/people", (req, res) => {
+  res.json({ sucess: true });
+});
+
+app.post("/api/v1/people", (req, res) => {
+  if (req.body.name) {
+    people.push({ id: people.length + 1, name: req.body.name });
+    res.status(201).json({ success: true, name: req.body.name });
+  } else {
+    res.status(400).json({ success: false, message: "Please provide a name" });
+  }
 });
 
 app.all("*", (req, res) => {
