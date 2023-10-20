@@ -1,20 +1,35 @@
 const express = require("express");
 const app = express();
-const logger = require("./logger");
+let { people } = require("./data");
 
-// req => middleware => res
-app.use(logger);
+// static assets
+app.use(express.static("./methods-public"));
+// parse form data
+app.use(express.urlencoded({ extended: false }));
+// parse json
+app.use(express.json());
 
-app.get("/", logger, (req, res) => {
-  res.send("Home");
+app.get("/api/people", (req, res) => {
+  res.status(200).json({ success: true, data: people });
 });
 
-app.get("/about", (req, res) => {
-  res.send("About");
+app.post("/api/people", (req, res) => {
+  const { name } = req.body;
+  if (!name) {
+    return res
+      .status(201)
+      .json({ success: false, msg: "please provide name value" });
+  }
+  res.status(201).json({ success: true, person: "Does not exist" });
 });
 
-app.all("*", (req, res) => {
-  res.status(404).send("Page not found");
+app.post("/login", (req, res) => {
+  const { name } = req.body;
+  if (name) {
+    return res.status(200).send(`Welcome ${name}`);
+  }
+
+  res.status(401).send("Please provide credentials");
 });
 
 app.listen(3000, () => {
