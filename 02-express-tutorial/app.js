@@ -1,77 +1,58 @@
 const express = require("express");
 const app = express();
-const { products, people } = require("./data");
+const logger = require("./logger");
+const cookieParser = require("cookie-parser");
 
-const logger = (req, res, next) => {
-  const method = req.method;
-  const url = req.url;
-  const time = Date.now();
-  console.log(method, url, time);
+// routers
+const peopleRouter = require("./routes/people");
+const productsRouter = require("./routes/products");
+const queryRouter = require("./routes/query");
 
+// middleware
+app.use([
+  express.static("./public"),
+  logger,
+  express.urlencoded({ extended: false }),
+  express.json(),
+  cookieParser(),
+]);
+
+const auth = (req, res, next) => {
+  if (!req.cookies.name) {
+    return res.status(401).json({ msg: "Unathorized" });
+  }
+  req.user = req.cookies.name;
   next();
 };
 
-app.use([
-  logger,
-  express.static("./public"),
-  express.urlencoded({ extended: false }),
-  express.json(),
-]);
+// routes
+app.post("/logon", (req, res) => {
+  if (!req.body.name) {
+    return res.status(400).json({ error: "Please provide a name" });
+  }
+  res.status(201).cookie("name", req.body.name).send(`Hello ${req.body.name}`);
+});
+
+app.delete("/logoff", (req, res) => {
+  res.clearCookie("name");
+  res.status(200).json({ msg: "User is logged off" });
+});
+
+app.get("/test", auth, (req, res) => {
+  res.status(200).json({ msg: `Welcome ${req.user}` });
+});
 
 app.get("/api/v1/test", (req, res) => {
   res.json({ message: "It worked" });
 });
-
-app.get("/api/v1/products", (req, res) => {
-  res.send(products);
-});
-
-app.get("/api/v1/products/:productID", (req, res) => {
-  const idToFind = parseInt(req.params.productID);
-  const product = products.find((p) => p.id === idToFind);
-  if (!product) {
-    return res.status(404).json({ message: "That product was not found" });
-  }
-  res.json(product);
-});
-
-app.get("/api/v1/query", (req, res) => {
-  console.log(req.query);
-  let newProducts = [...products];
-  const { search, limit, priceLimit } = req.query;
-  if (search) {
-    newProducts = newProducts.filter((product) => {
-      return product.name.includes(search);
-    });
-  }
-  if (limit) {
-    newProducts = newProducts.slice(0, Number(limit));
-  }
-  if (priceLimit) {
-    newProducts = newProducts.filter((product) => {
-      return Number(product.price) <= priceLimit;
-    });
-  }
-  res.json(newProducts);
-});
-
-app.get("/api/v1/people", (req, res) => {
-  res.json({ sucess: true });
-});
-
-app.post("/api/v1/people", (req, res) => {
-  if (req.body.name) {
-    people.push({ id: people.length + 1, name: req.body.name });
-    res.status(201).json({ success: true, name: req.body.name });
-  } else {
-    res.status(400).json({ success: false, message: "Please provide a name" });
-  }
-});
-
+app.use("/api/v1/query", queryRouter);
+app.use("/api/v1/products", productsRouter);
+app.use("/api/v1/people", peopleRouter);
 app.all("*", (req, res) => {
   res.status(404).send("<h1> Oh no! Your page was not found.</h1>");
 });
 
+// PORT
 app.listen(3000, () => {
   console.log("App is listening on port 3000. Woot woot!");
 });
