@@ -1,0 +1,17 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+textarea {
+  display: block;
+  font-family: inherit;
+  font-size: 100%;
+  margin-bottom: 1em;
+}
+
+#priceLimit,
+#limit {
+  width: 4rem;
+}
